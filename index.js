@@ -2,9 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 ////////////// Conecting to database and creating Schema
 mongoose.connect(
@@ -24,18 +26,23 @@ const todoSchema = new mongoose.Schema({
 //////////////Redirecting to Today database by default
 
 app.get("/", function (req, res) {
+  console.log("redirecting");
   res.redirect("/Today");
 });
 
 ///////Redirecting to Capitalise DB and launching react app
+app.use(express.static(path.join(__dirname + "/build")));
 
 app.get("/:databaseName", (req, res) => {
   const route = req.params.databaseName;
+  if (route === "") {
+    return res.redirect("/Today");
+  }
   if (route[0] != route[0].toUpperCase()) {
     console.log(route, route[0]);
     res.redirect("/" + _.capitalize(route));
   } else {
-    res.send("react aplication");
+    res.sendFile(path.join(__dirname + "/build/index.html"));
   }
 });
 
@@ -44,6 +51,7 @@ app.get("/:databaseName", (req, res) => {
 app
   .route("/:databaseName/API")
   .get(function (req, res) {
+    console.log("fetching");
     const Db = mongoose.model(req.params.databaseName, todoSchema);
     Db.find(function (err, todos) {
       if (err) console.error(err);
@@ -68,6 +76,8 @@ app
     });
   });
 
-app.listen(3000, () => {
-  console.log("listening on port 5000");
+const port = process.env.PORT ? process.env.PORT : 3000;
+
+app.listen(port, () => {
+  console.log("server up");
 });
