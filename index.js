@@ -10,8 +10,11 @@ app.use(cors());
 
 ////////////// Conecting to database and creating Schema
 mongoose.connect(
-  "mongodb+srv://luizzitol:XiyAuA7hkKaeDykY@nieto-3f60x.mongodb.net/todoDB",
-  { useNewUrlParser: true, useUnifiedTopology: true }
+  process.env.MONGODB_URI || `mongodb://localhost:27017/node-react-starter`,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
 );
 let db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -26,30 +29,14 @@ const todoSchema = new mongoose.Schema({
 //////////////Redirecting to Today database by default
 
 app.get("/", function (req, res) {
-  console.log("redirecting");
+  console.log("redirecting to TOoday");
   res.redirect("/Today");
-});
-
-///////Redirecting to Capitalise DB and launching react app
-app.use(express.static(path.join(__dirname + "/build")));
-
-app.get("/:databaseName", (req, res) => {
-  const route = req.params.databaseName;
-  if (route === "") {
-    return res.redirect("/Today");
-  }
-  if (route[0] != route[0].toUpperCase()) {
-    console.log(route, route[0]);
-    res.redirect("/" + _.capitalize(route));
-  } else {
-    res.sendFile(path.join(__dirname + "/build/index.html"));
-  }
 });
 
 /////// Modifying DB
 
 app
-  .route("/:databaseName/API")
+  .route("/api/:databaseName")
   .get(function (req, res) {
     console.log("fetching");
     const Db = mongoose.model(req.params.databaseName, todoSchema);
@@ -76,7 +63,21 @@ app
     });
   });
 
-const port = process.env.PORT ? process.env.PORT : 3000;
+///////Redirecting to Capitalise DB and launching react app
+app.use(express.static(path.join(__dirname, "react-app", "build")));
+
+app.get("/:databaseName", (req, res) => {
+  const route = req.params.databaseName;
+  if (route[0] != route[0].toUpperCase()) {
+    console.log(route, route[0], "redirecting to uppercase");
+    res.redirect("/" + _.capitalize(route));
+  } else {
+    console.log("serving react");
+    res.sendFile(path.join(__dirname, "react-app", "build", "index.html"));
+  }
+});
+
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log("server up");
