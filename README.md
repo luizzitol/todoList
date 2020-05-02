@@ -1,7 +1,7 @@
 # todoList
 https://luizzitol.github.io/todoList/
 
-This is a simple learning proyect. It uses Node js and MongoDB with Mongoose on the backend and React with React-router-dom on the front end.
+This is a simple learning proyect. It uses Node js and MongoDB with Mongoose on the backend and React with React-router-dom on the front end. You can visit the live Demo on https://nieto-todo.herokuapp.com/
 
 You can add any todos by clicking add or pressing enter and you can delete them by just clicking on them.
 
